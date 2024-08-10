@@ -24,7 +24,6 @@ const Login: React.FC = () => {
       email,
       password,
     });
-    console.log("result", result);
 
     if (result?.ok) {
       router.push("/chatbot");
@@ -35,9 +34,11 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gradient-to-r from-blue-400 to-blue-600">
-      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold mb-6 text-center">BuddyBot Login</h2>
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-400 to-blue-600 px-4">
+      <div className="w-full max-w-sm sm:max-w-md p-6 sm:p-8 bg-white rounded-lg shadow-lg">
+        <h2 className="text-xl sm:text-2xl font-bold mb-6 text-center">
+          BuddyBot Login
+        </h2>
         <form onSubmit={handleLogin}>
           <div className="mb-4">
             <label className="block text-sm font-bold mb-2" htmlFor="email">
@@ -48,7 +49,7 @@ const Login: React.FC = () => {
               <input
                 type="email"
                 id="email"
-                className="w-full outline-none"
+                className="w-full outline-none text-sm"
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -64,7 +65,7 @@ const Login: React.FC = () => {
               <input
                 type="password"
                 id="password"
-                className="w-full outline-none"
+                className="w-full outline-none text-sm"
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -78,7 +79,7 @@ const Login: React.FC = () => {
           )}
           <button
             type="submit"
-            className="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700"
+            className="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm sm:text-base"
           >
             {isLoading ? "Logging in..." : "Login"}
           </button>

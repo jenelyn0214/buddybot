@@ -3,7 +3,11 @@ import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import React, { useState, useEffect, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
+import {
+  faSignOutAlt,
+  faBars,
+  faTimes,
+} from "@fortawesome/free-solid-svg-icons";
 import axiosClient from "@/app/lib/axiosClient";
 import { Conversation } from "@prisma/client";
 import { CHATBOT_KEYS, chatbots, IChatbot } from "../constants/openai";
@@ -13,9 +17,7 @@ import { IMessage } from "../types/types";
 
 const Chatbot = () => {
   const { data: session, status } = useSession();
-
   const router = useRouter();
-
   const chatEndRef = useRef<HTMLDivElement | null>(null);
 
   const [loading, setLoading] = useState(true);
@@ -27,6 +29,7 @@ const Chatbot = () => {
     Conversation[]
   >([]);
   const [isTyping, setIsTyping] = useState<boolean>(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
 
   useEffect(() => {
     const getConversations = async () => {
@@ -51,7 +54,7 @@ const Chatbot = () => {
 
   useEffect(() => {
     const getConversationMessages = async () => {
-      setIsFetchingMessage(() => true);
+      setIsFetchingMessage(true);
       setMessages([]);
       if (!selectedChatbot?.id && selectedChatbot && selectedChatbot.slug) {
         sendMessage({
@@ -114,7 +117,7 @@ const Chatbot = () => {
         console.error(
           "Failed to send message: Response is undefined or missing required fields"
         );
-        setIsTyping(() => false);
+        setIsTyping(false);
         return;
       }
 
@@ -154,8 +157,8 @@ const Chatbot = () => {
               ]);
             }
 
-            setIsFetchingMessage(() => false);
-            setIsTyping(() => false);
+            setIsFetchingMessage(false);
+            setIsTyping(false);
             break;
           }
         }
@@ -164,9 +167,8 @@ const Chatbot = () => {
       await checkMessage();
     } catch (error) {
       console.error("Failed to send message:", error);
-      setIsTyping(() => false);
-
-      setIsFetchingMessage(() => false);
+      setIsTyping(false);
+      setIsFetchingMessage(false);
     }
   };
 
@@ -193,6 +195,16 @@ const Chatbot = () => {
     }
   };
 
+  const handleChatbotSelection = (bot: IChatbot) => {
+    const currentConversation = conversationThreads.find(
+      (item) => item.assistant === bot.slug
+    );
+    setSelectedChatbot({ ...bot, ...(currentConversation ?? {}) });
+    setIsSidebarOpen(false);
+  };
+
+  const closeSidebar = () => setIsSidebarOpen(false);
+
   if (status === "unauthenticated") {
     router.push("/login");
     return;
@@ -203,9 +215,29 @@ const Chatbot = () => {
   }
 
   return (
-    <div className="flex h-screen bg-gradient-to-r from-blue-400 to-blue-600">
+    <div className="relative flex h-screen bg-gradient-to-r from-blue-400 to-blue-600">
+      {/* Overlay when sidebar is open */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40"
+          onClick={closeSidebar}
+        ></div>
+      )}
+
+      {/* Sidebar Toggle Button */}
+      <button
+        className="md:hidden absolute top-4 left-4 text-gray-300 z-50"
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+      >
+        <FontAwesomeIcon icon={isSidebarOpen ? faTimes : faBars} size="2x" />
+      </button>
+
       {/* Sidebar */}
-      <div className="w-1/3 bg-white text-gray-900 p-4 flex flex-col rounded-l-lg shadow-lg">
+      <div
+        className={`fixed inset-y-0 left-0 bg-white text-gray-900 p-4 flex flex-col rounded-l-lg shadow-lg z-50 transform md:transform-none md:relative w-2/3 max-w-xs md:w-1/3 transition-transform duration-300 ease-in-out ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-bold">Hi, {session?.user?.name}</h2>
           <button
@@ -234,12 +266,7 @@ const Chatbot = () => {
                     ? "bg-blue-600 text-white"
                     : "hover:bg-blue-100 text-gray-800"
                 }`}
-                onClick={() => {
-                  setSelectedChatbot({
-                    ...bot,
-                    ...(currentConversation ?? {}),
-                  });
-                }}
+                onClick={() => handleChatbotSelection(bot)}
               >
                 <FontAwesomeIcon icon={bot.icon} className="mr-2 mt-1" />
                 <div>
@@ -261,8 +288,8 @@ const Chatbot = () => {
       </div>
 
       {/* Chat Window */}
-      <div className="w-2/3 p-4 flex flex-col h-full bg-white rounded-r-lg shadow-lg">
-        <h3 className="text-lg font-bold mb-4 text-blue-600">
+      <div className="flex-grow p-4 flex flex-col h-full bg-white rounded-r-lg shadow-lg ml-auto">
+        <h3 className="text-lg font-bold mb-4 text-blue-600 ml-12 md:ml-0">
           {selectedChatbot?.name}
         </h3>
         <div className="flex-grow p-4 bg-gray-100 rounded shadow-inner overflow-y-auto">
