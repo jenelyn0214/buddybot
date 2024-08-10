@@ -28,7 +28,7 @@ export const createThread = async ({
     [
       {
         role: "assistant",
-        content: `Greet the user and introduce yourself. The user name is ${userName} `,
+        content: `Greet the user and mention the user's name and introduce yourself. The user name is ${userName} `,
       },
     ];
 
