@@ -13,7 +13,9 @@ import { IMessage } from "../types/types";
 
 const Chatbot = () => {
   const { data: session, status } = useSession();
+
   const router = useRouter();
+
   const chatEndRef = useRef<HTMLDivElement | null>(null);
 
   const [loading, setLoading] = useState(true);
@@ -33,10 +35,6 @@ const Chatbot = () => {
         const currentConversation = conversations.find(
           (item) => item.assistant === chatbots[0].slug
         );
-
-        console.log("conversations", conversations);
-
-        console.log("currentConversation", currentConversation);
 
         setConversationThreads(conversations);
         setSelectedChatbot({ ...chatbots[0], ...(currentConversation ?? {}) });
@@ -195,15 +193,14 @@ const Chatbot = () => {
     }
   };
 
-  if (loading) {
-    return <Loading />;
-  }
-
-  if (!loading && !session?.user) {
+  if (status === "unauthenticated") {
     router.push("/login");
     return;
   }
-  console.log("isTyping", isTyping);
+
+  if (loading) {
+    return <Loading />;
+  }
 
   return (
     <div className="flex h-screen bg-gradient-to-r from-blue-400 to-blue-600">
@@ -212,7 +209,11 @@ const Chatbot = () => {
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-bold">Hi, {session?.user?.name}</h2>
           <button
-            onClick={() => signOut()}
+            onClick={() =>
+              signOut({
+                callbackUrl: "/login",
+              })
+            }
             className="text-sm font-medium text-blue-600 hover:text-blue-700 underline flex items-center"
           >
             Logout <FontAwesomeIcon icon={faSignOutAlt} className="ml-2" />
