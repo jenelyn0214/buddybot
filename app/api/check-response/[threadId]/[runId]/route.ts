@@ -1,28 +1,32 @@
+import { checkRun, getRunMessages } from "@/app/lib/openai";
 import { NextRequest, NextResponse } from "next/server";
-// import { checkRun, getRunMessages } from "@/api/conversation";
-// import { extractTitleAndMessage } from "@/utils/data";
+import { TextContentBlock } from "openai/resources/beta/threads/messages.mjs";
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { threadId: string; runId: string } }
-) {
-  //   const { threadId, runId } = params;
+interface RequestContext {
+  params: {
+    threadId: string;
+    runId: string;
+  };
+}
 
-  //   const run = await checkRun(threadId, runId);
+export async function GET(req: NextRequest, ctx: RequestContext) {
+  const { params } = ctx;
+  const { threadId, runId } = params;
 
-  //   if (run.status === "completed") {
-  //     const messages = await getRunMessages(threadId, runId);
-  //     const content = messages.data[0].content[0];
+  const run = await checkRun(threadId, runId);
 
-  //     const extracted = extractTitleAndMessage(content.text.value ?? "");
+  if (run.status === "completed") {
+    const messages = await getRunMessages(threadId, runId);
+    const content = messages.data[0].content[0] as TextContentBlock;
 
-  //     return NextResponse.json({
-  //       isWaiting: false,
-  //       response: extracted.response,
-  //       title: extracted.title,
-  //     });
-  //   }
+    return NextResponse.json({
+      isWaiting: false,
+      response: content.text.value,
+      runId,
+      threadId,
+    });
+  }
 
-  return NextResponse.json({ isWaiting: true, response: "" });
+  return NextResponse.json({ isWaiting: true });
 }
 

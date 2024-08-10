@@ -1,24 +1,28 @@
+import {
+  formatConversationMessages,
+  getConversationMessages,
+} from "@/app/lib/conversation";
+import { getThreadMessages } from "@/app/lib/openai";
 import { NextRequest, NextResponse } from "next/server";
-// import { getConversationMessages } from "@/api/conversation";
-// import {
-//   formatConversationMessages,
-//   getThreadMessages,
-// } from "@/api/conversation";
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { conversationId: string } }
-) {
-  //   const { conversationId } = params;
+interface RequestContext {
+  params: {
+    conversationId: number;
+  };
+}
 
-  //   const conversationData = await getConversationMessages(conversationId);
+export async function GET(req: NextRequest, ctx: RequestContext) {
+  const { params } = ctx;
+  const { conversationId } = params;
 
-  //   if (conversationData?.threadId) {
-  //     const messages = await getThreadMessages(conversationData?.threadId);
-  //     const formattedMessages = await formatConversationMessages(messages);
+  const conversationData = await getConversationMessages(conversationId);
 
-  //     return NextResponse.json({ messages: formattedMessages });
-  //   }
+  if (conversationData?.threadId) {
+    const messages = await getThreadMessages(conversationData?.threadId);
+    const formattedMessages = await formatConversationMessages(messages);
+
+    return NextResponse.json({ messages: formattedMessages });
+  }
 
   return NextResponse.json({ messages: [] });
 }

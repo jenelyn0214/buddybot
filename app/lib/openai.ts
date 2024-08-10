@@ -1,26 +1,25 @@
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-import openai from "openai";
-import { SYSTEM_PROMPTS } from "../constants/openai";
 
-export const sendOpenAIMessage = async (prompt: string) => {
+const ASSISTANTS_KEY = process.env.ASSISTANTS_KEY;
+import openai from "openai";
+
+export const getAssitants = async () => {
   const openaiClient = new openai.OpenAI({
     apiKey: OPENAI_API_KEY,
   });
 
-  const completion = await openaiClient.chat.completions.create({
-    messages: [...SYSTEM_PROMPTS, { role: "user", content: prompt }],
-    model: "gpt-3.5-turbo",
-    max_tokens: 300,
-  });
+  const assistants = await openaiClient.beta.assistants.list();
 
-  return completion.choices?.[0].message.content;
+  return assistants;
 };
 
-export const createThread = async (
-  prompt: string,
-  assistantId: string,
-  additionalInstructions?: string
-) => {
+export const createThread = async ({
+  userName,
+  assistantId,
+}: {
+  userName: string;
+  assistantId: string;
+}) => {
   const openaiClient = new openai.OpenAI({
     apiKey: OPENAI_API_KEY,
   });
@@ -28,14 +27,8 @@ export const createThread = async (
   const messages: openai.Beta.Threads.ThreadCreateAndRunParams.Thread.Message[] =
     [
       {
-        role: "user",
-        content: prompt,
-      },
-      {
         role: "assistant",
-        content:
-          "Please generate a title based on the prompt and enclose it in a curly brackets. Put the title at the beginning of the reponse. \n\n" +
-          (additionalInstructions ?? ""),
+        content: `Greet the user and introduce yourself. The user name is ${userName} `,
       },
     ];
 
@@ -51,12 +44,15 @@ export const createThread = async (
   return run;
 };
 
-export const addThreadMessage = async (
-  prompt: string,
-  threadId: string,
-  assistantId: string,
-  additionalInstructions?: string
-) => {
+export const addThreadMessage = async ({
+  prompt,
+  threadId,
+  assistantId,
+}: {
+  prompt: string;
+  threadId: string;
+  assistantId: string;
+}) => {
   const openaiClient = new openai.OpenAI({
     apiKey: OPENAI_API_KEY,
   });
@@ -64,12 +60,6 @@ export const addThreadMessage = async (
   await openaiClient.beta.threads.messages.create(threadId, {
     content: prompt,
     role: "user",
-  });
-
-  await openaiClient.beta.threads.messages.create(threadId, {
-    content:
-      "Don't add title on next reponse.\n\n" + (additionalInstructions ?? ""),
-    role: "assistant",
   });
 
   const run = await openaiClient.beta.threads.runs.create(threadId, {
@@ -109,5 +99,15 @@ export const getThreadMessages = async (threadId: string) => {
   const messages = await openaiClient.beta.threads.messages.list(threadId);
 
   return messages;
+};
+
+export const getAssistantId = (assistantKey: string): string => {
+  console.log(
+    "assistantKey",
+    assistantKey,
+    process.env["ASSISTANT_KEY_" + assistantKey]
+  );
+
+  return process.env["ASSISTANT_KEY_" + assistantKey] || "";
 };
 

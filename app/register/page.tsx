@@ -6,27 +6,33 @@ import { faUser, faEnvelope, faLock } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
+import axiosClient from "../lib/axiosClient";
+import { HttpStatusCode } from "axios";
 
 const Register: React.FC = () => {
   const [nickname, setNickname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errorText, setErrorText] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorText("");
+    setIsLoading(true);
 
     // Send user data to your backend for account creation
-    const res = await fetch("/api/auth/register", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ nickname, email, password }),
+    const res = await axiosClient.post("/api/register", {
+      nickname,
+      email,
+      password,
     });
 
-    if (res.ok) {
-      // Automatically log in the user after registration
+    if (
+      res.status === HttpStatusCode.Ok ||
+      res.status === HttpStatusCode.Created
+    ) {
       const result = await signIn("credentials", {
         redirect: false,
         email,
@@ -36,11 +42,12 @@ const Register: React.FC = () => {
       if (result?.ok) {
         router.push("/chatbot");
       } else {
-        alert("Login failed. Please try to log in manually.");
+        setErrorText("Login failed. Please try to log in manually.");
       }
     } else {
-      alert("Registration failed. Please try again.");
+      setErrorText("Registration failed. Please try again.");
     }
+    setIsLoading(false);
   };
 
   return (
@@ -99,11 +106,16 @@ const Register: React.FC = () => {
               />
             </div>
           </div>
+          {errorText && (
+            <div className="text-red-400 text-sm text-center mb-2">
+              {errorText}
+            </div>
+          )}
           <button
             type="submit"
             className="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700"
           >
-            Register
+            {isLoading ? "Creating account..." : "Register"}
           </button>
         </form>
         <div className="mt-4 text-center">

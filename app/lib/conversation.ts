@@ -1,155 +1,98 @@
-// import { Conversation, PrismaClient } from "@prisma/client";
-// import { randomUUID } from "crypto";
+import { Conversation, PrismaClient } from "@prisma/client";
+import {
+  MessagesPage,
+  TextContentBlock,
+} from "openai/resources/beta/threads/messages.mjs";
+import { IMessage } from "../types/types";
 
-// const prisma = new PrismaClient();
+const prisma = new PrismaClient();
 
-// export const createConversation = async (
-//   threadId: string,
-//   userId: number,
-//   title: string,
-//   contextMap?: string
-// ): Promise<Conversation> => {
-//   const conversation = await prisma.conversation.create({
-//     data: {
-//       threadId,
-//       userId,
-//       title,
-//       contextMap,
-//     },
-//   });
+export const createConversation = async (
+  threadId: string,
+  userId: number,
+  assistant: string
+): Promise<Conversation> => {
+  const newUser = parseInt("" + userId);
 
-//   return conversation;
-// };
+  const conversation = await prisma.conversation.create({
+    data: {
+      threadId,
+      userId: newUser,
+      assistant,
+    },
+  });
 
-// export const getConversationsByThread = async (
-//   threadId: string
-// ): Promise<Conversation[]> => {
-//   const conversations = await prisma.conversation.findMany({
-//     where: {
-//       threadId,
-//     },
-//   });
+  return conversation;
+};
 
-//   return conversations;
-// };
+export const getConversationsByThread = async (
+  threadId: string
+): Promise<Conversation[]> => {
+  const conversations = await prisma.conversation.findMany({
+    where: {
+      threadId,
+    },
+  });
 
-// export const getConversations = async (
-//   userId: string
-// ): Promise<Conversation[]> => {
-//   const conversations = await prisma.conversation.findMany({
-//     where: {
-//       userId,
-//     },
-//   });
+  return conversations;
+};
 
-//   return conversations;
-// };
+export const getConversations = async (
+  userId: number
+): Promise<Conversation[]> => {
+  const conversations = await prisma.conversation.findMany({
+    where: {
+      userId: parseInt(userId.toString()),
+    },
+  });
 
-// export const getConversationMessages = async (
-//   conversationId: string
-// ): Promise<Conversation | null> => {
-//   const conversation = await prisma.conversation.findFirst({
-//     where: {
-//       id: conversationId,
-//     },
-//   });
+  return conversations;
+};
 
-//   return conversation;
-// };
+export const getConversationMessages = async (
+  conversationId: number
+): Promise<Conversation | null> => {
+  const conversation = await prisma.conversation.findFirst({
+    where: {
+      id: parseInt(conversationId.toString()),
+    },
+  });
 
-// export const formatConversationMessages = async (
-//   messages: MessagesPage
-// ): Promise<IMessage[]> => {
-//   const filterMessages = messages.data.filter(
-//     (message) =>
-//       message.role === "user" ||
-//       (message.role === "assistant" && message.run_id)
-//   );
+  return conversation;
+};
 
-//   const formattedMessages: IMessage[] = (filterMessages || []).map(
-//     (message) => {
-//       const content = message.content[0] as TextContentBlock;
+export const deleteConversation = async (
+  conversationId: number
+): Promise<Conversation> => {
+  const conversation = await prisma.conversation.delete({
+    where: {
+      id: conversationId,
+    },
+  });
 
-//       const extracted = extractTitleAndMessage(content.text.value ?? "");
+  return conversation;
+};
 
-//       return {
-//         message: extracted.response,
-//         isOwn: message.role === "user",
-//       };
-//     }
-//   );
+export const formatConversationMessages = async (
+  messages: MessagesPage
+): Promise<IMessage[]> => {
+  const filterMessages = messages.data.filter(
+    (message) =>
+      message.role === "user" ||
+      (message.role === "assistant" && message.run_id)
+  );
 
-//   return formattedMessages.reverse();
-// };
+  const formattedMessages: IMessage[] = (filterMessages || []).map(
+    (message) => {
+      const content = message.content[0] as TextContentBlock;
 
-// export const getShareConversation = async (
-//   shareToken: string
-// ): Promise<Conversation | null> => {
-//   const conversation = await prisma.conversation.findFirst({
-//     where: {
-//       shareToken,
-//     },
-//   });
+      return {
+        message: content.text.value,
+        isOwn: message.role === "user",
+      };
+    }
+  );
 
-//   return conversation;
-// };
-
-// export const createShareLink = async (
-//   conversationId: string
-// ): Promise<Conversation> => {
-//   const conversation = await prisma.conversation.update({
-//     data: {
-//       shareToken: randomUUID(),
-//     },
-//     where: {
-//       id: conversationId,
-//     },
-//   });
-
-//   return conversation;
-// };
-
-// export const updateContextMap = async (
-//   id: string,
-//   contextMap: string
-// ): Promise<Conversation> => {
-//   const conversation = await prisma.conversation.update({
-//     data: {
-//       contextMap,
-//     },
-//     where: {
-//       id,
-//     },
-//   });
-
-//   return conversation;
-// };
-
-// export const renameConversationTitle = async (
-//   conversationId: string,
-//   newTitle: string
-// ): Promise<Conversation> => {
-//   const conversation = await prisma.conversation.update({
-//     data: {
-//       title: newTitle,
-//     },
-//     where: {
-//       id: conversationId,
-//     },
-//   });
-
-//   return conversation;
-// };
-
-// export const deleteConversation = async (
-//   conversationId: string
-// ): Promise<Conversation> => {
-//   const conversation = await prisma.conversation.delete({
-//     where: {
-//       id: conversationId,
-//     },
-//   });
-
-//   return conversation;
-// };
+  return formattedMessages.reverse();
+};
 
