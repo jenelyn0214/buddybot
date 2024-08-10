@@ -5,7 +5,7 @@ import React from "react";
 const Main: React.FC = () => {
   const router = useRouter();
 
-  router.push("/login");
+  router.push("/chatbot");
   return null;
 };
 

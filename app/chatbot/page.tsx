@@ -8,7 +8,6 @@ import {
   faBars,
   faTimes,
 } from "@fortawesome/free-solid-svg-icons";
-import axiosClient from "@/app/lib/axiosClient";
 import { Conversation } from "@prisma/client";
 import { CHATBOT_KEYS, chatbots, IChatbot } from "../constants/openai";
 import Loading from "../components/Loading";
