@@ -53,13 +53,13 @@ const handler = (req: any, res: any) => {
     callbacks: {
       async session({ session, token }) {
         if (token && session.user) {
-          session.user.id = token.id as unknown as number; // Ensure the ID is treated as a number
+          session.user.id = token.id as string; // Ensure the ID is treated as a number
         }
         return session;
       },
       async jwt({ token, user }) {
         if (user) {
-          token.id = user.id as unknown as number; // Store ID as a number after proper type assertion
+          token.id = user.id as string; // Store ID as a number after proper type assertion
         }
         return token;
       },

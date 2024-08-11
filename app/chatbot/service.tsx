@@ -9,6 +9,7 @@ export interface MessageResponse {
   runId: string;
   isWaiting: string;
   response?: string;
+  conversation?: Conversation;
 }
 
 const sendMessage = async ({

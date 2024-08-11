@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 interface RequestContext {
   params: {
-    conversationId: number;
+    conversationId: string;
   };
 }
 

@@ -9,15 +9,13 @@ const prisma = new PrismaClient();
 
 export const createConversation = async (
   threadId: string,
-  userId: number,
+  userId: string,
   assistant: string
 ): Promise<Conversation> => {
-  const newUser = parseInt("" + userId);
-
   const conversation = await prisma.conversation.create({
     data: {
       threadId,
-      userId: newUser,
+      userId,
       assistant,
     },
   });
@@ -38,11 +36,11 @@ export const getConversationsByThread = async (
 };
 
 export const getConversations = async (
-  userId: number
+  userId: string
 ): Promise<Conversation[]> => {
   const conversations = await prisma.conversation.findMany({
     where: {
-      userId: parseInt(userId.toString()),
+      userId,
     },
   });
 
@@ -50,11 +48,11 @@ export const getConversations = async (
 };
 
 export const getConversationMessages = async (
-  conversationId: number
+  conversationId: string
 ): Promise<Conversation | null> => {
   const conversation = await prisma.conversation.findFirst({
     where: {
-      id: parseInt(conversationId.toString()),
+      id: conversationId,
     },
   });
 
@@ -62,7 +60,7 @@ export const getConversationMessages = async (
 };
 
 export const deleteConversation = async (
-  conversationId: number
+  conversationId: string
 ): Promise<Conversation> => {
   const conversation = await prisma.conversation.delete({
     where: {

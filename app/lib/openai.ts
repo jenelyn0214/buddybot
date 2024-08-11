@@ -1,6 +1,5 @@
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
-const ASSISTANTS_KEY = process.env.ASSISTANTS_KEY;
 import openai from "openai";
 
 export const getAssitants = async () => {

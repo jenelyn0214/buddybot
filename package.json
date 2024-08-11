@@ -7,7 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "production:build": "npx prisma generate && npx prisma migrate deploy && next build"
+    "production:build": "npx prisma generate && npx prisma migrate deploy && next build",
+    "migrate:dev": "npx prisma migrate dev --name init",
+    "migrate:reset": "npx prisma migrate reset",
+    "prisma:generate": "npx prisma generate"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.6.0",
@@ -35,3 +38,4 @@
     "typescript": "^5"
   }
 }
+

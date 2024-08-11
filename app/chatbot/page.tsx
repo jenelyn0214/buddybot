@@ -120,6 +120,13 @@ const Chatbot = () => {
         return;
       }
 
+      if (sendMessageResponse.conversation) {
+        setConversationThreads([
+          ...conversationThreads,
+          sendMessageResponse.conversation,
+        ]);
+      }
+
       if (!selectedChatbot?.threadId) {
         setSelectedChatbot((prev) => {
           return {

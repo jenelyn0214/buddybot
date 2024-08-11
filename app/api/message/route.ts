@@ -35,12 +35,17 @@ export async function POST(req: NextRequest) {
       assistantId,
     });
 
-    await createConversation(run.thread_id, token.id, assistant);
+    const conversation = await createConversation(
+      run.thread_id,
+      token.id,
+      assistant
+    );
 
     runResponse = {
       threadId: run.thread_id,
       runId: run.id,
       isWaiting: true,
+      conversation,
     };
   }
 
